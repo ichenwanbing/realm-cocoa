@@ -11,6 +11,15 @@ x.x.x Release notes (yyyy-mm-dd)
 * Realm Object Server errors not explicitly recognized by the client are now reported to the application
   regardless.
 * Add support for JSON Web Token as a sync credential source.
+* Improve allocator performance when writing to a highly fragmented file. This
+  should significantly improve performance when inserting large numbers of
+  objects which have indexed properties.
+* Improve write performance for complex object graphs involving many classes
+  linking to each other.
+
+### Bugfixes
+
+* Fix some cases where non-fatal sync errors were being treated as fatal errors.
 
 3.0.2 Release notes (2017-11-08)
 =============================================================
