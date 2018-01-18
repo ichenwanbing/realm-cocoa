@@ -176,6 +176,7 @@ using namespace realm;
     Class objectUtil = [objectClass objectUtilClass:isSwiftClass];
     NSArray *ignoredProperties = [objectUtil ignoredPropertiesForClass:objectClass];
     NSDictionary *linkingObjectsProperties = [objectUtil linkingObjectsPropertiesForClass:objectClass];
+    NSDictionary *columnNameMap = [objectClass _realmColumnNames];
 
     // For Swift classes we need an instance of the object when parsing properties
     id swiftObjectInstance = isSwiftClass ? [[objectClass alloc] init] : nil;
@@ -206,6 +207,9 @@ using namespace realm;
         }
 
         if (prop) {
+            if (columnNameMap) {
+                prop.columnName = columnNameMap[prop.name];
+            }
             [propArray addObject:prop];
         }
     }
@@ -372,7 +376,7 @@ using namespace realm;
 - (realm::ObjectSchema)objectStoreCopy {
     ObjectSchema objectSchema;
     objectSchema.name = self.objectName.UTF8String;
-    objectSchema.primary_key = _primaryKeyProperty ? _primaryKeyProperty.name.UTF8String : "";
+    objectSchema.primary_key = _primaryKeyProperty ? (_primaryKeyProperty.columnName ?: _primaryKeyProperty.name).UTF8String : "";
     for (RLMProperty *prop in _properties) {
         Property p = [prop objectStoreCopy];
         p.is_primary = (prop == _primaryKeyProperty);

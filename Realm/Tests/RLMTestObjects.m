@@ -335,6 +335,7 @@
 + (NSDictionary *)linkingObjectsProperties { return nil; }
 + (BOOL)shouldIncludeInDefaultSchema { return NO; }
 + (NSString *)_realmObjectName { return nil; }
++ (NSDictionary *)_realmColumnNames { return nil; }
 @end
 
 #pragma mark ComputedPropertyNotExplicitlyIgnoredObject

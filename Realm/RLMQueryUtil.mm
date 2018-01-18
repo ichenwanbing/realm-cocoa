@@ -213,7 +213,7 @@ public:
     : m_links(links), m_property(property), m_schema(schema), m_group(&group), m_query(&query), m_table(query.get_table().get())
     {
         auto& table = walk_link_chain([](Table&, size_t, RLMPropertyType) { });
-        m_index = table.get_column_index(m_property.name.UTF8String);
+        m_index = table.get_column_index(m_property.columnName.UTF8String);
     }
 
     template <typename T, typename... SubQuery>

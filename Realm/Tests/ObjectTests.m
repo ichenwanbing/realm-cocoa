@@ -197,12 +197,67 @@ RLM_ARRAY_TYPE(CycleObject)
 @implementation SubclassDateObject
 @end
 
+@interface RenamedProperties1 : RLMObject
+@property (nonatomic) int propA;
+@property (nonatomic) NSString *propB;
+@end
+@implementation RenamedProperties1
++ (NSString *)_realmObjectName {
+    return @"Renamed Properties";
+}
++ (NSDictionary *)_realmColumnNames {
+    return @{@"propA": @"prop 1",
+             @"propB": @"prop 2"};
+}
+@end
+
+@interface RenamedProperties2 : RLMObject
+@property (nonatomic) int propC;
+@property (nonatomic) NSString *propD;
+@end
+@implementation RenamedProperties2
++ (NSString *)_realmObjectName {
+    return @"Renamed Properties";
+}
++ (NSDictionary *)_realmColumnNames {
+    return @{@"propC": @"prop 1",
+             @"propD": @"prop 2"};
+}
+@end
+
+
 #pragma mark - Tests
 
 @interface ObjectTests : RLMTestCase
 @end
 
 @implementation ObjectTests
+
+- (void)testStuff {
+    RenamedProperties1 *obj1 = [[RenamedProperties1 alloc] initWithValue:@{@"propA": @5, @"propB": @"a"}];
+    XCTAssertEqual(obj1.propA, 5);
+    XCTAssertEqualObjects(obj1.propB, @"a");
+    XCTAssertEqualObjects(obj1[@"propA"], @5);
+    XCTAssertEqualObjects(obj1[@"propB"], @"a");
+
+    RLMRealm *realm = [RLMRealm defaultRealm];
+    [realm beginWriteTransaction];
+    [realm addObject:obj1];
+    XCTAssertEqual(obj1.propA, 5);
+    XCTAssertEqualObjects(obj1.propB, @"a");
+    XCTAssertEqualObjects(obj1[@"propA"], @5);
+    XCTAssertEqualObjects(obj1[@"propB"], @"a");
+    
+    RenamedProperties2 *obj2 = [RenamedProperties2 createInRealm:realm withValue:@{@"propC": @6, @"propD": @"b"}];
+    [realm commitWriteTransaction];
+
+    XCTAssertEqual([RenamedProperties1 allObjectsInRealm:realm].count, 2U);
+    XCTAssertEqual([RenamedProperties2 allObjectsInRealm:realm].count, 2U);
+    XCTAssertEqual([RenamedProperties1 objectsInRealm:realm where:@"propA == 5"].count, 1U);
+    XCTAssertEqual([RenamedProperties1 objectsInRealm:realm where:@"propA == 6"].count, 1U);
+    XCTAssertEqual([RenamedProperties2 objectsInRealm:realm where:@"propC == 5"].count, 1U);
+    XCTAssertEqual([RenamedProperties2 objectsInRealm:realm where:@"propC == 6"].count, 1U);
+}
 
 - (void)testKeyedSubscripting {
     EmployeeObject *objs = [[EmployeeObject alloc] initWithValue:@{@"name": @"Test0", @"age": @23, @"hired": @NO}];

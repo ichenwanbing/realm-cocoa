@@ -369,7 +369,7 @@ extension SyncUser {
     /**
      An optional error handler which can be set to notify the host application when
      the user encounters an error.
-     
+
      - note: Check for `.invalidAccessToken` to see if the user has been remotely logged
              out because its refresh token expired, or because the third party authentication
              service providing the user's identity has logged the user out.
@@ -666,3 +666,82 @@ extension Results where Element == SyncPermission {
 /// :nodoc:
 @available(*, unavailable, renamed: "SyncPermission")
 public final class SyncPermissionValue { }
+
+public struct PrivilegeLevel: OptionSet {
+    public let rawValue: Int
+
+    public static let read = PrivilegeLevel(rawValue: 1 << 0)
+    public static let update = PrivilegeLevel(rawValue: 1 << 1)
+    public static let delete = PrivilegeLevel(rawValue: 1 << 2)
+    public static let setPermissions = PrivilegeLevel(rawValue: 1 << 3)
+    public static let share = PrivilegeLevel(rawValue: 1 << 4)
+    public static let query = PrivilegeLevel(rawValue: 1 << 5)
+    public static let creste = PrivilegeLevel(rawValue: 1 << 6)
+    public static let modifySchema = PrivilegeLevel(rawValue: 1 << 7)
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+}
+
+public class PermissionRole: Object {
+    @objc dynamic public var name = ""
+    @objc dynamic private var _realmPrivileges = 0
+    public var realmPrivileges: PrivilegeLevel {
+        get { return PrivilegeLevel(rawValue: _realmPrivileges) }
+        set { _realmPrivileges = newValue.rawValue }
+    }
+
+    @objc override public class func _realmObjectName() -> String {
+        return "__Role"
+    }
+    @objc override public class func primaryKey() -> String {
+        return "name"
+    }
+    @objc override public class func _realmColumnNames() -> [String: String] {
+        return ["_realmPrivileges": "realmPrivileges"]
+    }
+}
+
+public class PermissionUser: Object {
+    @objc dynamic public var identity = ""
+    @objc dynamic public var role: PermissionRole? = nil
+
+    @objc override public class func _realmObjectName() -> String {
+        return "__User"
+    }
+    @objc override public class func primaryKey() -> String {
+        return "identity"
+    }
+}
+
+public class Permission: Object {
+    @objc dynamic public var role: PermissionRole? = nil
+    @objc dynamic private var _privileges = 0
+    public var privileges: PrivilegeLevel {
+        get { return PrivilegeLevel(rawValue: _privileges) }
+        set { _privileges = newValue.rawValue }
+    }
+
+    @objc override public class func _realmObjectName() -> String {
+        return "__Permission"
+    }
+    @objc override public class func _realmColumnNames() -> [String: String] {
+        return ["_privileges": "privileges"]
+    }
+}
+
+public class PermissionClass: Object {
+    @objc dynamic public var name = ""
+    public let permissions = List<Permission>()
+
+    @objc override public class func _realmObjectName() -> String {
+        return "__Class"
+    }
+    @objc override public class func _realmColumnNames() -> [String: String] {
+        return ["name": "class_name"]
+    }
+    @objc override public class func primaryKey() -> String {
+        return "name"
+    }
+}

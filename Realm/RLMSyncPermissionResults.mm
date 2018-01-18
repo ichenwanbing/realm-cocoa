@@ -31,17 +31,58 @@
 
 using namespace realm;
 
+@implementation RLMPermissionRole
++ (NSString *)_realmObjectName {
+    return @"__Role";
+}
++ (NSString *)primaryKey {
+    return @"name";
+}
++ (NSArray *)requiredProperties {
+    return @[@"name"];
+}
+@end
+
+@implementation RLMPermissionUser
++ (NSString *)_realmObjectName {
+    return @"__User";
+}
++ (NSString *)primaryKey {
+    return @"identity";
+}
++ (NSArray *)requiredProperties {
+    return @[@"identity"];
+}
+@end
+
+@implementation RLMPermission
++ (NSString *)_realmObjectName {
+    return @"__Permission";
+}
+@end
+
+@implementation RLMPermissionClass
++ (NSString *)_realmObjectName {
+    return @"__Class";
+}
++ (NSString *)primaryKey {
+    return @"name";
+}
++ (NSArray *)requiredProperties {
+    return @[@"name"];
+}
++ (NSDictionary *)_realmColumnNames {
+    return @{@"name": @"class_name"};
+}
+@end
+
 namespace {
 
 bool keypath_is_valid(NSString *keypath)
 {
-    static NSSet<NSString *> *valid = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        valid = [NSSet setWithArray:@[RLMSyncPermissionSortPropertyPath,
-                                      RLMSyncPermissionSortPropertyUserID,
-                                      RLMSyncPermissionSortPropertyUpdated]];
-    });
+    static auto valid = [NSSet setWithArray:@[RLMSyncPermissionSortPropertyPath,
+                                              RLMSyncPermissionSortPropertyUserID,
+                                              RLMSyncPermissionSortPropertyUpdated]];
     return [valid containsObject:keypath];
 }
 

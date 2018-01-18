@@ -94,6 +94,11 @@
     XCTAssertNil(error);
     XCTAssertEqual(dynamicSchema.objectSchema.count, expectedSchema.objectSchema.count);
     for (RLMObjectSchema *expectedObjectSchema in expectedSchema.objectSchema) {
+        Class cls = expectedObjectSchema.objectClass;
+        if ([cls _realmObjectName] || [cls _realmColumnNames]) {
+            // Class overrides names, so the dynamic schema for it shoudn't match
+            continue;
+        }
         RLMObjectSchema *dynamicObjectSchema = dynamicSchema[expectedObjectSchema.className];
         XCTAssertEqual(dynamicObjectSchema.properties.count, expectedObjectSchema.properties.count);
         for (NSUInteger propertyIndex = 0; propertyIndex < expectedObjectSchema.properties.count; propertyIndex++) {

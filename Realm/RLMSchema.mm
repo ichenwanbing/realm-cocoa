@@ -353,6 +353,19 @@ static void RLMRegisterClassLocalNames(Class *classes, NSUInteger count) {
         [_objectSchemaByName enumerateKeysAndObjectsUsingBlock:[&](NSString *, RLMObjectSchema *objectSchema, BOOL *) {
             schema.push_back(objectSchema.objectStoreCopy);
         }];
+
+        // Having both obj-c and Swift classes for the same tables results in
+        // duplicate ObjectSchemas that we need to filter out
+        std::sort(begin(schema), end(schema), [](auto&& a, auto&& b) { return a.name < b.name; });
+        schema.erase(std::unique(begin(schema), end(schema), [](auto&& a, auto&& b) {
+            if (a.name == b.name) {
+                // If we make _realmObjectName public this needs to be turned into an exception
+                REALM_ASSERT_DEBUG(a == b);
+                return true;
+            }
+            return false;
+        }), end(schema));
+        
         _objectStoreSchema = std::move(schema);
     }
     return _objectStoreSchema;

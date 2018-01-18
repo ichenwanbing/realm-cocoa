@@ -19,9 +19,33 @@
 #import <Foundation/Foundation.h>
 
 #import "RLMResults.h"
+#import "RLMArray.h"
+#import "RLMObject.h"
 
 @class RLMSyncPermission;
 
 // A private subclass of `RLMResults`.
 @interface RLMSyncPermissionResults : RLMResults<RLMSyncPermission *>
+@end
+
+RLM_ARRAY_TYPE(RLMPermission);
+
+@interface RLMPermissionRole : RLMObject
+@property (nonatomic) NSString *name;
+@property (nonatomic) int realmPrivileges;
+@end
+
+@interface RLMPermissionUser : RLMObject
+@property (nonatomic) NSString *identity;
+@property (nonatomic) RLMPermissionRole *role;
+@end
+
+@interface RLMPermission : RLMObject
+@property (nonatomic) RLMPermissionRole *role;
+@property (nonatomic) int privileges;
+@end
+
+@interface RLMPermissionClass : RLMObject
+@property (nonatomic) NSString *name;
+@property (nonatomic) RLMArray<RLMPermission *><RLMPermission> *role;
 @end

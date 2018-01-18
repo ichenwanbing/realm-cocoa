@@ -550,6 +550,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
 - (id)copyWithZone:(NSZone *)zone {
     RLMProperty *prop = [[RLMProperty allocWithZone:zone] init];
     prop->_name = _name;
+    prop->_columnName = _columnName;
     prop->_type = _type;
     prop->_objectClassName = _objectClassName;
     prop->_array = _array;
@@ -610,10 +611,17 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
             self.optional ? @"YES" : @"NO"];
 }
 
+- (NSString *)columnName {
+    return _columnName ?: _name;
+}
+
 - (realm::Property)objectStoreCopy {
     realm::Property p;
-    p.name = _name.UTF8String;
-    p.object_type = _objectClassName ? _objectClassName.UTF8String : "";
+    p.name = self.columnName.UTF8String;
+    if (_objectClassName) {
+        Class cls = [RLMSchema classForString:_objectClassName];
+        p.object_type = ([cls _realmObjectName] ?: _objectClassName).UTF8String;
+    }
     p.is_indexed = (bool)_indexed;
     p.link_origin_property_name = _linkOriginPropertyName ? _linkOriginPropertyName.UTF8String : "";
     p.type = static_cast<realm::PropertyType>(_type);

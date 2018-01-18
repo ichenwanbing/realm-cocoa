@@ -38,6 +38,32 @@ class DynamicDefaultObject: Object {
     }
 }
 
+class SyncModelTests: TestCase {
+    func testStuff() {
+        let role = PermissionRole()
+        role.name = "name"
+        role.realmPrivileges = [.read, .update]
+
+        let realm = try! Realm()
+        try! realm.write {
+            realm.add(role)
+        }
+        XCTAssertEqual(role.name, "name")
+        XCTAssertEqual(realm.objects(PermissionRole.self).first!.name, "name")
+        XCTAssertEqual(role.realmPrivileges, [.read, .update])
+        XCTAssertEqual(realm.objects(PermissionRole.self).first!.realmPrivileges, [.read, .update])
+
+        let user = PermissionUser()
+        user.identity = "identity"
+        user.role = role
+
+        try! realm.write {
+            realm.add(user)
+        }
+        XCTAssertEqual(user.role!.name, "name");
+    }
+}
+
 class ObjectTests: TestCase {
 
     // init() Tests are in ObjectCreationTests.swift
